@@ -1,0 +1,158 @@
+{
+  "sections": {
+    "main": {
+      "type": "snuggo-buybox",
+      "blocks": {
+        "pack1": {
+          "type": "pack",
+          "settings": {
+            "variant_position": 1,
+            "units": 1,
+            "title": "One Snuggo",
+            "subtitle": "For one child",
+            "tag": ""
+          }
+        },
+        "pack2": {
+          "type": "pack",
+          "settings": {
+            "variant_position": 2,
+            "units": 2,
+            "title": "Two Snuggos",
+            "subtitle": "One each, no taking turns",
+            "tag": "Best for siblings"
+          }
+        },
+        "trust1": {
+          "type": "trust",
+          "settings": {
+            "icon": "hand",
+            "text": "Only listens while the button is held"
+          }
+        },
+        "trust2": {
+          "type": "trust",
+          "settings": {
+            "icon": "nocam",
+            "text": "No camera, no screen"
+          }
+        },
+        "trust3": {
+          "type": "trust",
+          "settings": {
+            "icon": "eye",
+            "text": "You read every word in the app"
+          }
+        }
+      },
+      "block_order": [
+        "pack1",
+        "pack2",
+        "trust1",
+        "trust2",
+        "trust3"
+      ],
+      "settings": {}
+    },
+    "details": {
+      "type": "snuggo-details",
+      "blocks": {
+        "step1": {
+          "type": "step",
+          "settings": {
+            "title": "They talk",
+            "text": "Your child holds the button on Snuggo and says whatever's on their mind: a question, a story idea, how their day went."
+          }
+        },
+        "step2": {
+          "type": "step",
+          "settings": {
+            "title": "Snuggo talks back",
+            "text": "It answers out loud, asks them something back and keeps the story going. No screen involved."
+          }
+        },
+        "step3": {
+          "type": "step",
+          "settings": {
+            "title": "You see every word",
+            "text": "The back-and-forth shows up as a transcript in the free parent app on your phone, in real time."
+          }
+        },
+        "faq1": {
+          "type": "faq",
+          "settings": {
+            "question": "Is it always listening?",
+            "answer": "<p>No. Snuggo only listens while your child holds its button down. Let go, and the microphone switches off.</p>"
+          }
+        },
+        "faq2": {
+          "type": "faq",
+          "settings": {
+            "question": "What gets stored?",
+            "answer": "<p>Voice clips are turned into text so Snuggo can reply, then deleted. The written transcript goes to your parent app and stays there until you clear it.</p>"
+          }
+        },
+        "faq3": {
+          "type": "faq",
+          "settings": {
+            "question": "Who can see the chats?",
+            "answer": "<p>Only you. Every chat shows up as a live transcript in your parent app, and your child's data is never sold or used for advertising.</p>"
+          }
+        },
+        "faq4": {
+          "type": "faq",
+          "settings": {
+            "question": "Does it have a camera?",
+            "answer": "<p>No. Snuggo has no camera and no screen.</p>"
+          }
+        },
+        "faq5": {
+          "type": "faq",
+          "settings": {
+            "question": "Could it say something unsuitable?",
+            "answer": "<p>It's built for kids, with filters that steer away from grown-up topics, and you can flag any chat for review.</p>"
+          }
+        },
+        "faq6": {
+          "type": "faq",
+          "settings": {
+            "question": "Can I set limits?",
+            "answer": "<p>Yes. Choose topics and a daily time limit in the app. Snuggo stops chatting when time's up.</p>"
+          }
+        },
+        "faq7": {
+          "type": "faq",
+          "settings": {
+            "question": "Does it need Wi-Fi?",
+            "answer": "<p>Yes. Set it up once in the parent app on your home Wi-Fi.</p>"
+          }
+        },
+        "faq8": {
+          "type": "faq",
+          "settings": {
+            "question": "What if it breaks?",
+            "answer": "<p>Every Snuggo has a 1-year warranty. Unused Snuggos can come back within 30 days in their original packaging.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "step1",
+        "step2",
+        "step3",
+        "faq1",
+        "faq2",
+        "faq3",
+        "faq4",
+        "faq5",
+        "faq6",
+        "faq7",
+        "faq8"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "details"
+  ]
+}
