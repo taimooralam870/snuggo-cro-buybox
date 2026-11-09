@@ -51,10 +51,12 @@
           </div>
         {%- endfor -%}
       </div>
-      <div class="sb__dots" aria-hidden="true">
+      <button type="button" class="sb__arrow sb__arrow--prev" data-dir="-1" aria-label="Previous image">&#8249;</button>
+      <button type="button" class="sb__arrow sb__arrow--next" data-dir="1" aria-label="Next image">&#8250;</button>
+      <div class="sb__dots">
         {%- assign slides = product.media.size -%}
         {%- if section.settings.video != blank -%}{%- assign slides = slides | plus: 1 -%}{%- endif -%}
-        {%- for i in (1..slides) -%}<i{% if forloop.first %} class="is-on"{% endif %}></i>{%- endfor -%}
+        {%- for i in (1..slides) -%}<button type="button" data-go="{{ forloop.index0 }}" aria-label="Show image {{ i }}"{% if forloop.first %} class="is-on"{% endif %}></button>{%- endfor -%}
       </div>
     </div>
 
@@ -69,8 +71,8 @@
 
       <h1 class="sb__title">{{ section.settings.headline | default: product.title }}</h1>
       <div class="sb__price">
-        <span class="sb__now" data-price>{{ current_variant.price | money }}</span>
-        <s class="sb__was" data-compare>{% if current_variant.compare_at_price > current_variant.price %}{{ current_variant.compare_at_price | money }}{% endif %}</s>
+        <span class="sb__now" data-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
+        <s class="sb__was" data-compare>{% if current_variant.compare_at_price > current_variant.price %}{{ current_variant.compare_at_price | money_without_trailing_zeros }}{% endif %}</s>
       </div>
       {%- if section.settings.show_split -%}
         <p class="sb__split">or 4 payments of <span data-split>{{ current_variant.price | divided_by: 4 | money }}</span> with {{ section.settings.split_provider }}</p>
@@ -101,8 +103,8 @@
                 {%- assign each = v.price | divided_by: units -%}
                 <label class="sb__pack" {{ block.shopify_attributes }}>
                   <input type="radio" name="sb-pack-{{ sid }}" value="{{ v.id }}"
-                    data-price="{{ v.price | money }}"
-                    data-compare="{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money }}{% endif %}"
+                    data-price="{{ v.price | money_without_trailing_zeros }}"
+                    data-compare="{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money_without_trailing_zeros }}{% endif %}"
                     data-split="{{ v.price | divided_by: 4 | money }}"
                     {% if v.id == current_variant.id %}checked{% endif %}
                     {% unless v.available %}disabled{% endunless %}>
@@ -111,9 +113,9 @@
                     <small>{{ block.settings.subtitle }}</small>
                   </span>
                   <span class="sb__pack-price">
-                    <strong>{{ v.price | money }}</strong>
+                    <strong>{{ v.price | money_without_trailing_zeros }}</strong>
                     {%- if units > 1 -%}<small>{{ each | money }} each</small>
-                    {%- elsif v.compare_at_price > v.price -%}<s>{{ v.compare_at_price | money }}</s>{%- endif -%}
+                    {%- elsif v.compare_at_price > v.price -%}<s>{{ v.compare_at_price | money_without_trailing_zeros }}</s>{%- endif -%}
                   </span>
                   {%- if block.settings.tag != blank -%}<em class="sb__tag">{{ block.settings.tag }}</em>{%- endif -%}
                 </label>
@@ -151,7 +153,7 @@
 
   {%- comment -%} ===== Sticky add to cart (mobile) ===== {%- endcomment -%}
   <div class="sb__sticky" data-sticky aria-hidden="true">
-    <span><strong data-price>{{ current_variant.price | money }}</strong> <s data-compare>{% if current_variant.compare_at_price > current_variant.price %}{{ current_variant.compare_at_price | money }}{% endif %}</s></span>
+    <span><strong data-price>{{ current_variant.price | money_without_trailing_zeros }}</strong> <s data-compare>{% if current_variant.compare_at_price > current_variant.price %}{{ current_variant.compare_at_price | money_without_trailing_zeros }}{% endif %}</s></span>
     <button type="submit" form="sb-form-{{ sid }}" class="sb__cta sb__cta--sm" tabindex="-1">{{ section.settings.cta_label }}</button>
   </div>
 </section>
@@ -167,8 +169,11 @@
   #sb-{{ sid }} .sb__cap{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.7);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px}
   #sb-{{ sid }} .sb__badge{position:absolute;z-index:2;top:12px;left:12px;background:#fff;border:1px solid var(--ink);border-radius:99px;padding:4px 10px;font-size:12px;font-weight:600}
   #sb-{{ sid }} .sb__dots{display:flex;justify-content:center;gap:6px;padding:8px 0}
-  #sb-{{ sid }} .sb__dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
-  #sb-{{ sid }} .sb__dots i.is-on{background:var(--ink)}
+  #sb-{{ sid }} .sb__dots button{width:8px;height:8px;padding:0;border:0;border-radius:50%;background:var(--line);cursor:pointer}
+  #sb-{{ sid }} .sb__dots button.is-on{background:var(--ink)}
+  #sb-{{ sid }} .sb__arrow{position:absolute;top:calc(50% - 34px);z-index:2;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:var(--ink);font-size:24px;line-height:1;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  #sb-{{ sid }} .sb__arrow--prev{left:10px}
+  #sb-{{ sid }} .sb__arrow--next{right:10px}
   #sb-{{ sid }} .sb__box{padding:0 16px 24px}
   #sb-{{ sid }} .sb__rating{display:inline-flex;gap:6px;font-size:13px;color:inherit;text-decoration:none}
   #sb-{{ sid }} .sb__stars{color:#e8a33d;letter-spacing:1px}
@@ -230,14 +235,23 @@
       root.querySelectorAll('[data-offer]').forEach(function (el) { el.hidden = true; });
     }
 
-    // Gallery dots
+    // Gallery: dots, arrows and swipe stay in sync
     var track = root.querySelector('.sb__track');
-    var dots = root.querySelectorAll('.sb__dots i');
+    var dots = root.querySelectorAll('.sb__dots button');
+    var go = function (i) {
+      i = Math.max(0, Math.min(dots.length - 1, i));
+      track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
+    };
+    var current = function () { return Math.round(track.scrollLeft / track.clientWidth); };
     if (track && dots.length) {
       track.addEventListener('scroll', function () {
-        var i = Math.round(track.scrollLeft / track.clientWidth);
+        var i = current();
         dots.forEach(function (d, n) { d.classList.toggle('is-on', n === i); });
       }, { passive: true });
+      dots.forEach(function (d) { d.addEventListener('click', function () { go(+d.dataset.go); }); });
+      root.querySelectorAll('.sb__arrow').forEach(function (b) {
+        b.addEventListener('click', function () { go(current() + +b.dataset.dir); });
+      });
     }
 
     // Sticky bar once the main button leaves the screen

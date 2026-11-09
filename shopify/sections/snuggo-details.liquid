@@ -1,0 +1,117 @@
+{%- comment -%}
+  Snuggo – how it works, what's in the box and parent FAQ.
+  Sits under the buy box. All copy is editable as blocks.
+{%- endcomment -%}
+
+{%- assign sid = section.id -%}
+
+<section id="sd-{{ sid }}" class="sd">
+  <div class="sd__wrap">
+
+    {%- if section.settings.steps_heading != blank -%}
+      <h2 class="sd__h">{{ section.settings.steps_heading }}</h2>
+    {%- endif -%}
+    <ol class="sd__steps">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'step' -%}
+          <li class="sd__step" {{ block.shopify_attributes }}>
+            <span class="sd__num" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+            <h3>{{ block.settings.title }}</h3>
+            <p>{{ block.settings.text }}</p>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+
+    {%- if section.settings.box_items != blank -%}
+      <div class="sd__box">
+        <h2 class="sd__h">{{ section.settings.box_heading }}</h2>
+        <ul>
+          {%- assign items = section.settings.box_items | newline_to_br | split: '<br />' -%}
+          {%- for item in items -%}
+            {%- assign t = item | strip -%}
+            {%- if t != blank -%}<li>{{ t }}</li>{%- endif -%}
+          {%- endfor -%}
+        </ul>
+        {%- if section.settings.box_note != blank -%}<p class="sd__note">{{ section.settings.box_note }}</p>{%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.faq_heading != blank -%}
+      <h2 class="sd__h">{{ section.settings.faq_heading }}</h2>
+    {%- endif -%}
+    <div class="sd__faq">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'faq' -%}
+          <details {{ block.shopify_attributes }}>
+            <summary>{{ block.settings.question }}</summary>
+            <div class="sd__a">{{ block.settings.answer }}</div>
+          </details>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  #sd-{{ sid }}{--ink:{{ section.settings.c_ink }};color:var(--ink);background:{{ section.settings.c_bg }};padding:32px 16px 48px}
+  #sd-{{ sid }} .sd__wrap{max-width:1100px;margin:0 auto}
+  #sd-{{ sid }} .sd__h{font-size:24px;line-height:1.2;margin:0 0 16px}
+  #sd-{{ sid }} .sd__steps{list-style:none;padding:0;margin:0 0 36px;display:grid;gap:12px}
+  #sd-{{ sid }} .sd__step{background:#fff;border-radius:14px;padding:16px}
+  #sd-{{ sid }} .sd__num{font-weight:700;font-size:13px;color:{{ section.settings.c_accent }}}
+  #sd-{{ sid }} .sd__step h3{margin:4px 0 6px;font-size:18px}
+  #sd-{{ sid }} .sd__step p{margin:0;font-size:15px;line-height:1.5}
+  #sd-{{ sid }} .sd__box{background:#fff;border-radius:14px;padding:16px;margin:0 0 36px}
+  #sd-{{ sid }} .sd__box ul{margin:0;padding-left:18px;line-height:1.7}
+  #sd-{{ sid }} .sd__note{margin:10px 0 0;font-size:14px;background:#fff6d6;border-radius:8px;padding:8px 10px}
+  #sd-{{ sid }} .sd__faq details{border-bottom:1px solid rgba(0,0,0,.12)}
+  #sd-{{ sid }} .sd__faq summary{cursor:pointer;list-style:none;padding:14px 28px 14px 0;font-weight:600;font-size:16px;position:relative}
+  #sd-{{ sid }} .sd__faq summary::-webkit-details-marker{display:none}
+  #sd-{{ sid }} .sd__faq summary::after{content:"+";position:absolute;right:4px;top:12px;font-size:20px}
+  #sd-{{ sid }} .sd__faq details[open] summary::after{content:"\2212"}
+  #sd-{{ sid }} .sd__a{padding:0 0 14px;font-size:15px;line-height:1.55}
+  @media (min-width:990px){
+    #sd-{{ sid }}{padding:56px 16px 72px}
+    #sd-{{ sid }} .sd__steps{grid-template-columns:repeat(3,1fr)}
+    #sd-{{ sid }} .sd__h{font-size:32px}
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Snuggo details",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "steps_heading", "label": "How it works heading", "default": "How Snuggo works" },
+    { "type": "text", "id": "box_heading", "label": "Box heading", "default": "What's in the box" },
+    { "type": "textarea", "id": "box_items", "label": "Box items (one per line)", "default": "Snuggo and soft loop\nCharging cable\nUser manual\nFree parent app" },
+    { "type": "text", "id": "box_note", "label": "Box note", "default": "No toy in the box. Snuggo loops onto the plush they already love." },
+    { "type": "text", "id": "faq_heading", "label": "FAQ heading", "default": "Straight answers for parents" },
+    { "type": "color", "id": "c_ink", "label": "Text", "default": "#3b2418" },
+    { "type": "color", "id": "c_bg", "label": "Background", "default": "#fdf3ea" },
+    { "type": "color", "id": "c_accent", "label": "Accent", "default": "#e5534b" }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "limit": 3,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "They talk" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Your child holds the button on Snuggo and says whatever's on their mind." }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "Is it always listening?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>No. Snuggo only listens while your child holds its button down.</p>" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Snuggo details" }],
+  "enabled_on": { "templates": ["product"] }
+}
+{% endschema %}
