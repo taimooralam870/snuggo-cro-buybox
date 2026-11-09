@@ -1,0 +1,15 @@
+{%- comment -%} Usage: {% render 'snuggo-icon', name: 'hand' %} {%- endcomment -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  {%- case name -%}
+    {%- when 'hand' -%}
+      <rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>
+    {%- when 'nocam' -%}
+      <path d="M3 7h3l2-2h5M21 17V7h-3l-1-1M8 8.5A4 4 0 0 0 12 16a4 4 0 0 0 3.5-2M3 3l18 18"/>
+    {%- when 'eye' -%}
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>
+    {%- when 'shield' -%}
+      <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>
+    {%- when 'return' -%}
+      <path d="M4 9h11a5 5 0 0 1 0 10H8"/><path d="M8 5L4 9l4 4"/>
+  {%- endcase -%}
+</svg>
