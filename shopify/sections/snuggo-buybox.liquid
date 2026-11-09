@@ -1,0 +1,329 @@
+{%- comment -%}
+  Snuggo – mobile-first hero + buy box
+  - All prices come from product variants (money filter), never hardcoded.
+  - Pack cards map to product variants by position (1 = first variant).
+  - Add to cart is the native Shopify product form, so Shopify's Meta / Google
+    channel events (AddToCart, add_to_cart) keep firing in every test arm.
+{%- endcomment -%}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign sid = section.id
+  assign form_id = 'sb-form-' | append: sid
+-%}
+
+<section id="sb-{{ sid }}" class="sb" data-offer-end="{{ section.settings.offer_end }}">
+  <div class="sb__wrap">
+
+    {%- comment -%} ===== Gallery ===== {%- endcomment -%}
+    <div class="sb__gallery">
+      {%- if section.settings.badge != blank -%}
+        <span class="sb__badge">{{ section.settings.badge }}</span>
+      {%- endif -%}
+      <div class="sb__track" role="region" aria-label="Product media" tabindex="0">
+        {%- for media in product.media -%}
+          {%- if forloop.index == 2 and section.settings.video != blank -%}
+            <div class="sb__slide sb__slide--video">
+              {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, preload: 'none', class: 'sb__video' }}
+              <span class="sb__cap">{{ section.settings.video_caption }}</span>
+            </div>
+          {%- endif -%}
+          <div class="sb__slide">
+            {%- if media.media_type == 'image' -%}
+              {%- liquid
+                if forloop.first
+                  assign img_loading = 'eager'
+                  assign img_priority = 'high'
+                else
+                  assign img_loading = 'lazy'
+                  assign img_priority = 'auto'
+                endif
+              -%}
+              {{ media | image_url: width: 900 | image_tag:
+                  widths: '400, 600, 900',
+                  sizes: '(min-width: 990px) 50vw, 100vw',
+                  loading: img_loading,
+                  fetchpriority: img_priority,
+                  alt: media.alt | escape }}
+            {%- else -%}
+              {{ media | media_tag: image_size: '900x' }}
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+      <div class="sb__dots" aria-hidden="true">
+        {%- assign slides = product.media.size -%}
+        {%- if section.settings.video != blank -%}{%- assign slides = slides | plus: 1 -%}{%- endif -%}
+        {%- for i in (1..slides) -%}<i{% if forloop.first %} class="is-on"{% endif %}></i>{%- endfor -%}
+      </div>
+    </div>
+
+    {%- comment -%} ===== Buy box ===== {%- endcomment -%}
+    <div class="sb__box">
+      {%- if section.settings.rating != blank -%}
+        <a class="sb__rating" href="{{ section.settings.rating_link | default: '#reviews' }}">
+          <span class="sb__stars" aria-hidden="true">★★★★★</span>
+          <span>{{ section.settings.rating }}</span>
+        </a>
+      {%- endif -%}
+
+      <h1 class="sb__title">{{ section.settings.headline | default: product.title }}</h1>
+      <div class="sb__price">
+        <span class="sb__now" data-price>{{ current_variant.price | money }}</span>
+        <s class="sb__was" data-compare>{% if current_variant.compare_at_price > current_variant.price %}{{ current_variant.compare_at_price | money }}{% endif %}</s>
+      </div>
+      {%- if section.settings.show_split -%}
+        <p class="sb__split">or 4 payments of <span data-split>{{ current_variant.price | divided_by: 4 | money }}</span> with {{ section.settings.split_provider }}</p>
+      {%- endif -%}
+      {%- if section.settings.offer_text != blank -%}
+        <p class="sb__offer" data-offer>{{ section.settings.offer_text }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.toy_note != blank -%}
+        <p class="sb__note">{{ section.settings.toy_note }}</p>
+      {%- endif -%}
+      {%- if section.settings.subhead != blank -%}
+        <p class="sb__sub">{{ section.settings.subhead }}</p>
+      {%- endif -%}
+
+
+      {% form 'product', product, id: form_id, class: 'sb__form', novalidate: 'novalidate' %}
+        <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-input>
+
+        <fieldset class="sb__packs">
+          <legend class="sb__legend">{{ section.settings.packs_label }}</legend>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'pack' -%}
+              {%- assign idx = block.settings.variant_position | minus: 1 -%}
+              {%- assign v = product.variants[idx] -%}
+              {%- if v -%}
+                {%- assign units = block.settings.units | at_least: 1 -%}
+                {%- assign each = v.price | divided_by: units -%}
+                <label class="sb__pack" {{ block.shopify_attributes }}>
+                  <input type="radio" name="sb-pack-{{ sid }}" value="{{ v.id }}"
+                    data-price="{{ v.price | money }}"
+                    data-compare="{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money }}{% endif %}"
+                    data-split="{{ v.price | divided_by: 4 | money }}"
+                    {% if v.id == current_variant.id %}checked{% endif %}
+                    {% unless v.available %}disabled{% endunless %}>
+                  <span class="sb__pack-main">
+                    <strong>{{ block.settings.title }}</strong>
+                    <small>{{ block.settings.subtitle }}</small>
+                  </span>
+                  <span class="sb__pack-price">
+                    <strong>{{ v.price | money }}</strong>
+                    {%- if units > 1 -%}<small>{{ each | money }} each</small>
+                    {%- elsif v.compare_at_price > v.price -%}<s>{{ v.compare_at_price | money }}</s>{%- endif -%}
+                  </span>
+                  {%- if block.settings.tag != blank -%}<em class="sb__tag">{{ block.settings.tag }}</em>{%- endif -%}
+                </label>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </fieldset>
+
+
+        <button type="submit" name="add" class="sb__cta" data-cta {% unless current_variant.available %}disabled{% endunless %}>
+          {%- if current_variant.available -%}{{ section.settings.cta_label }}{%- else -%}Sold out{%- endif -%}
+        </button>
+      {% endform %}
+
+      {%- if section.settings.delivery != blank -%}
+        <p class="sb__ship">{{ section.settings.delivery }}</p>
+      {%- endif -%}
+
+      <ul class="sb__trust">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'trust' -%}
+            <li {{ block.shopify_attributes }}>
+              <span class="sb__ico" aria-hidden="true">{%- render 'snuggo-icon', name: block.settings.icon -%}</span>
+              <span>{{ block.settings.text }}</span>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+
+      {%- if section.settings.wifi_note != blank -%}
+        <p class="sb__wifi">{{ section.settings.wifi_note }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%} ===== Sticky add to cart (mobile) ===== {%- endcomment -%}
+  <div class="sb__sticky" data-sticky aria-hidden="true">
+    <span><strong data-price>{{ current_variant.price | money }}</strong> <s data-compare>{% if current_variant.compare_at_price > current_variant.price %}{{ current_variant.compare_at_price | money }}{% endif %}</s></span>
+    <button type="submit" form="sb-form-{{ sid }}" class="sb__cta sb__cta--sm" tabindex="-1">{{ section.settings.cta_label }}</button>
+  </div>
+</section>
+
+<style>
+  #sb-{{ sid }}{--ink:{{ section.settings.c_ink }};--bg:{{ section.settings.c_bg }};--cta:{{ section.settings.c_cta }};--line:rgba(0,0,0,.12);color:var(--ink);background:var(--bg)}
+  #sb-{{ sid }} .sb__wrap{max-width:1100px;margin:0 auto;display:grid;gap:16px}
+  #sb-{{ sid }} .sb__gallery{position:relative}
+  #sb-{{ sid }} .sb__track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  #sb-{{ sid }} .sb__track::-webkit-scrollbar{display:none}
+  #sb-{{ sid }} .sb__slide{flex:0 0 100%;scroll-snap-align:start;aspect-ratio:4/3;position:relative;background:#f3e9df}
+  #sb-{{ sid }} .sb__slide img,#sb-{{ sid }} .sb__video{width:100%;height:100%;object-fit:cover;display:block}
+  #sb-{{ sid }} .sb__cap{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.7);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px}
+  #sb-{{ sid }} .sb__badge{position:absolute;z-index:2;top:12px;left:12px;background:#fff;border:1px solid var(--ink);border-radius:99px;padding:4px 10px;font-size:12px;font-weight:600}
+  #sb-{{ sid }} .sb__dots{display:flex;justify-content:center;gap:6px;padding:8px 0}
+  #sb-{{ sid }} .sb__dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+  #sb-{{ sid }} .sb__dots i.is-on{background:var(--ink)}
+  #sb-{{ sid }} .sb__box{padding:0 16px 24px}
+  #sb-{{ sid }} .sb__rating{display:inline-flex;gap:6px;font-size:13px;color:inherit;text-decoration:none}
+  #sb-{{ sid }} .sb__stars{color:#e8a33d;letter-spacing:1px}
+  #sb-{{ sid }} .sb__title{font-size:26px;line-height:1.1;margin:4px 0 6px}
+  #sb-{{ sid }} .sb__sub{margin:0 0 10px;font-size:15px;line-height:1.45}
+  #sb-{{ sid }} .sb__note{margin:0 0 12px;font-size:14px;background:#fff6d6;border-radius:8px;padding:8px 10px}
+  #sb-{{ sid }} .sb__offer{margin:0 0 10px;font-size:14px;font-weight:600;color:var(--cta)}
+  #sb-{{ sid }} .sb__packs{border:0;padding:0;margin:0 0 12px;display:grid;gap:8px}
+  #sb-{{ sid }} .sb__legend{font-size:13px;font-weight:600;margin-bottom:6px}
+  #sb-{{ sid }} .sb__pack{position:relative;display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer;min-height:56px}
+  #sb-{{ sid }} .sb__pack:has(input:checked){border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+  #sb-{{ sid }} .sb__pack input{accent-color:var(--ink);width:18px;height:18px;margin:0}
+  #sb-{{ sid }} .sb__pack-main{flex:1;display:grid}
+  #sb-{{ sid }} .sb__pack small{font-size:12px;opacity:.75}
+  #sb-{{ sid }} .sb__pack-price{display:grid;text-align:right}
+  #sb-{{ sid }} .sb__tag{position:absolute;top:-9px;right:10px;background:var(--cta);color:#fff;font-style:normal;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px}
+  #sb-{{ sid }} .sb__price{display:flex;align-items:baseline;gap:8px}
+  #sb-{{ sid }} .sb__now{font-size:26px;font-weight:700}
+  #sb-{{ sid }} .sb__was{opacity:.6}
+  #sb-{{ sid }} .sb__split{margin:2px 0 12px;font-size:13px}
+  #sb-{{ sid }} .sb__cta{width:100%;min-height:52px;border:0;border-radius:99px;background:var(--cta);color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+  #sb-{{ sid }} .sb__cta:disabled{opacity:.5}
+  #sb-{{ sid }} .sb__ship{margin:10px 0;font-size:13px;text-align:center}
+  #sb-{{ sid }} .sb__trust{list-style:none;padding:12px 0 0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid var(--line)}
+  #sb-{{ sid }} .sb__trust li{display:grid;justify-items:center;text-align:center;gap:4px;font-size:12px;line-height:1.3}
+  #sb-{{ sid }} .sb__ico svg{width:22px;height:22px}
+  #sb-{{ sid }} .sb__wifi{font-size:12px;opacity:.8;margin:12px 0 0;text-align:center}
+  #sb-{{ sid }} .sb__sticky{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);transform:translateY(110%);transition:transform .2s}
+  #sb-{{ sid }} .sb__sticky.is-on{transform:none}
+  #sb-{{ sid }} .sb__cta--sm{width:auto;min-height:44px;padding:0 22px;font-size:15px}
+  @media (min-width:990px){
+    #sb-{{ sid }} .sb__wrap{grid-template-columns:1.1fr 1fr;gap:40px;padding:32px 16px}
+    #sb-{{ sid }} .sb__title{font-size:40px}
+    #sb-{{ sid }} .sb__slide{aspect-ratio:1/1}
+    #sb-{{ sid }} .sb__sticky{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){#sb-{{ sid }} .sb__sticky{transition:none}}
+</style>
+
+<script>
+  (function () {
+    var root = document.getElementById('sb-{{ sid }}');
+    if (!root) return;
+    var input = root.querySelector('[data-variant-input]');
+
+    // Pack picker -> variant id + prices everywhere
+    root.querySelectorAll('input[name="sb-pack-{{ sid }}"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        input.value = r.value;
+        root.querySelectorAll('[data-price]').forEach(function (el) { el.textContent = r.dataset.price; });
+        root.querySelectorAll('[data-compare]').forEach(function (el) { el.textContent = r.dataset.compare; });
+        root.querySelectorAll('[data-split]').forEach(function (el) { el.textContent = r.dataset.split; });
+      });
+    });
+
+    // Hide the offer line automatically after the end date (YYYY-MM-DD, end of day AEDT)
+    var end = root.dataset.offerEnd;
+    if (end && new Date() > new Date(end + 'T23:59:59+11:00')) {
+      root.querySelectorAll('[data-offer]').forEach(function (el) { el.hidden = true; });
+    }
+
+    // Gallery dots
+    var track = root.querySelector('.sb__track');
+    var dots = root.querySelectorAll('.sb__dots i');
+    if (track && dots.length) {
+      track.addEventListener('scroll', function () {
+        var i = Math.round(track.scrollLeft / track.clientWidth);
+        dots.forEach(function (d, n) { d.classList.toggle('is-on', n === i); });
+      }, { passive: true });
+    }
+
+    // Sticky bar once the main button leaves the screen
+    var cta = root.querySelector('[data-cta]');
+    var bar = root.querySelector('[data-sticky]');
+    if ('IntersectionObserver' in window && cta && bar) {
+      new IntersectionObserver(function (e) {
+        var off = !e[0].isIntersecting && e[0].boundingClientRect.top < 0;
+        bar.classList.toggle('is-on', off);
+        bar.setAttribute('aria-hidden', off ? 'false' : 'true');
+        bar.querySelector('button').tabIndex = off ? 0 : -1;
+      }).observe(cta);
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Snuggo buy box",
+  "tag": "div",
+  "class": "section-snuggo-buybox",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "badge", "label": "Image badge", "default": "Christmas gift · ages 3 to 8" },
+    { "type": "text", "id": "headline", "label": "Headline (blank = product title)", "default": "Their favourite toy, talking back" },
+    { "type": "textarea", "id": "subhead", "label": "Subheading", "default": "Snuggo clips onto the plush they already love and chats with them. You read every word in the free parent app." },
+    { "type": "text", "id": "toy_note", "label": "Toy note", "default": "Uses their own soft toy. Toy not included." },
+    { "type": "text", "id": "rating", "label": "Rating text (only real reviews, blank hides it)", "info": "Example: 4.8 from 312 parent reviews" },
+    { "type": "url", "id": "rating_link", "label": "Rating link" },
+    { "type": "header", "content": "Media" },
+    { "type": "video", "id": "video", "label": "Demo video (shown as slide 2)" },
+    { "type": "text", "id": "video_caption", "label": "Video caption", "default": "Sound off · captions on" },
+    { "type": "header", "content": "Offer" },
+    { "type": "text", "id": "offer_text", "label": "Offer line", "default": "Black Friday: $100 off until Mon 30 Nov" },
+    { "type": "text", "id": "offer_end", "label": "Offer end date (YYYY-MM-DD)", "default": "2026-11-30", "info": "The offer line hides itself after this date." },
+    { "type": "text", "id": "packs_label", "label": "Pack picker label", "default": "How many?" },
+    { "type": "checkbox", "id": "show_split", "label": "Show instalment line", "default": true },
+    { "type": "text", "id": "split_provider", "label": "Instalment provider", "default": "Afterpay" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Add to cart" },
+    { "type": "text", "id": "delivery", "label": "Delivery line", "default": "Free shipping · Order by Tue 15 Dec for Christmas" },
+    { "type": "text", "id": "wifi_note", "label": "Setup note", "default": "Works on your home Wi-Fi with the free parent app (iOS & Android)." },
+    { "type": "header", "content": "Colours" },
+    { "type": "color", "id": "c_ink", "label": "Text", "default": "#3b2418" },
+    { "type": "color", "id": "c_bg", "label": "Background", "default": "#fdf3ea" },
+    { "type": "color", "id": "c_cta", "label": "Button", "default": "#e5534b" }
+  ],
+  "blocks": [
+    {
+      "type": "pack",
+      "name": "Pack option",
+      "settings": [
+        { "type": "range", "id": "variant_position", "label": "Variant position", "min": 1, "max": 10, "step": 1, "default": 1 },
+        { "type": "range", "id": "units", "label": "Units in pack", "min": 1, "max": 5, "step": 1, "default": 1 },
+        { "type": "text", "id": "title", "label": "Title", "default": "One Snuggo" },
+        { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "For one child" },
+        { "type": "text", "id": "tag", "label": "Tag (optional)" }
+      ]
+    },
+    {
+      "type": "trust",
+      "name": "Trust item",
+      "limit": 3,
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "default": "hand", "options": [
+          { "value": "hand", "label": "Push to talk" },
+          { "value": "nocam", "label": "No camera" },
+          { "value": "eye", "label": "You see every word" },
+          { "value": "shield", "label": "Warranty" },
+          { "value": "return", "label": "Returns" }
+        ]},
+        { "type": "text", "id": "text", "label": "Text", "default": "Only listens while the button is held" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Snuggo buy box",
+      "blocks": [
+        { "type": "pack", "settings": { "variant_position": 1, "units": 1, "title": "One Snuggo", "subtitle": "For one child" } },
+        { "type": "pack", "settings": { "variant_position": 2, "units": 2, "title": "Two Snuggos", "subtitle": "One each, no taking turns", "tag": "Best for siblings" } },
+        { "type": "trust", "settings": { "icon": "hand", "text": "Only listens while the button is held" } },
+        { "type": "trust", "settings": { "icon": "nocam", "text": "No camera, no screen" } },
+        { "type": "trust", "settings": { "icon": "eye", "text": "You read every word in the app" } }
+      ]
+    }
+  ],
+  "enabled_on": { "templates": ["product"] }
+}
+{% endschema %}
