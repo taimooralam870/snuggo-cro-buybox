@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Snuggo buy box – prototype</title>
+<!-- Prototype only: prices are fixed here. The Shopify section reads them from variants. -->
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#fdf3ea;padding-bottom:80px}
+.bar{background:#3b2418;color:#fff;text-align:center;font-size:12px;padding:6px 16px}
+.hd{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-weight:700;color:#3b2418}
+
+  #sb{--ink:#3b2418;--bg:#fdf3ea;--cta:#e5534b;--line:rgba(0,0,0,.12);color:var(--ink);background:var(--bg)}
+  #sb .sb__wrap{max-width:1100px;margin:0 auto;display:grid;gap:16px}
+  #sb .sb__gallery{position:relative}
+  #sb .sb__track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  #sb .sb__track::-webkit-scrollbar{display:none}
+  #sb .sb__slide{flex:0 0 100%;scroll-snap-align:start;aspect-ratio:4/3;position:relative;background:#f3e9df}
+  #sb .sb__slide img,#sb .sb__video{width:100%;height:100%;object-fit:cover;display:block}
+  #sb .sb__cap{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.7);color:#fff;font-size:13px;padding:4px 8px;border-radius:6px}
+  #sb .sb__badge{position:absolute;z-index:2;top:12px;left:12px;background:#fff;border:1px solid var(--ink);border-radius:99px;padding:4px 10px;font-size:12px;font-weight:600}
+  #sb .sb__dots{display:flex;justify-content:center;gap:6px;padding:8px 0}
+  #sb .sb__dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+  #sb .sb__dots i.is-on{background:var(--ink)}
+  #sb .sb__box{padding:0 16px 24px}
+  #sb .sb__rating{display:inline-flex;gap:6px;font-size:13px;color:inherit;text-decoration:none}
+  #sb .sb__stars{color:#e8a33d;letter-spacing:1px}
+  #sb .sb__title{font-size:26px;line-height:1.1;margin:4px 0 6px}
+  #sb .sb__sub{margin:0 0 10px;font-size:15px;line-height:1.45}
+  #sb .sb__note{margin:0 0 12px;font-size:14px;background:#fff6d6;border-radius:8px;padding:8px 10px}
+  #sb .sb__offer{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--cta)}
+  #sb .sb__packs{border:0;padding:0;margin:0 0 12px;display:grid;gap:8px}
+  #sb .sb__legend{font-size:13px;font-weight:600;margin-bottom:6px}
+  #sb .sb__pack{position:relative;display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer;min-height:56px}
+  #sb .sb__pack:has(input:checked){border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+  #sb .sb__pack input{accent-color:var(--ink);width:18px;height:18px;margin:0}
+  #sb .sb__pack-main{flex:1;display:grid}
+  #sb .sb__pack small{font-size:12px;opacity:.75}
+  #sb .sb__pack-price{display:grid;text-align:right}
+  #sb .sb__tag{position:absolute;top:-9px;right:10px;background:var(--cta);color:#fff;font-style:normal;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px}
+  #sb .sb__price{display:flex;align-items:baseline;gap:8px}
+  #sb .sb__now{font-size:26px;font-weight:700}
+  #sb .sb__was{opacity:.6}
+  #sb .sb__split{margin:2px 0 12px;font-size:13px}
+  #sb .sb__cta{width:100%;min-height:52px;border:0;border-radius:99px;background:var(--cta);color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+  #sb .sb__cta:disabled{opacity:.5}
+  #sb .sb__ship{margin:10px 0;font-size:13px;text-align:center}
+  #sb .sb__trust{list-style:none;padding:12px 0 0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid var(--line)}
+  #sb .sb__trust li{display:grid;justify-items:center;text-align:center;gap:4px;font-size:12px;line-height:1.3}
+  #sb .sb__ico svg{width:22px;height:22px}
+  #sb .sb__wifi{font-size:12px;opacity:.8;margin:12px 0 0;text-align:center}
+  #sb .sb__sticky{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);transform:translateY(110%);transition:transform .2s}
+  #sb .sb__sticky.is-on{transform:none}
+  #sb .sb__cta--sm{width:auto;min-height:44px;padding:0 22px;font-size:15px}
+  @media (min-width:990px){
+    #sb .sb__wrap{grid-template-columns:1.1fr 1fr;gap:40px;padding:32px 16px}
+    #sb .sb__title{font-size:40px}
+    #sb .sb__slide{aspect-ratio:1/1}
+    #sb .sb__sticky{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){#sb .sb__sticky{transition:none}}
+
+</style></head><body>
+<div class="bar">Free shipping on all orders</div>
+<header class="hd"><span>snuggo</span><span aria-label="Cart">&#128722;</span></header>
+<section id="sb" class="sb" data-offer-end="2026-11-30">
+ <div class="sb__wrap">
+  <div class="sb__gallery">
+   <span class="sb__badge">Christmas gift · ages 3 to 8</span>
+   <div class="sb__track" role="region" aria-label="Product media" tabindex="0"><div class="sb__slide"><img src="https://cdn.shopify.com/s/files/1/0677/8204/9927/files/Untitled_design_-_2025-12-03T205444.943-removebg-preview_ee32f78c-8e26-4f08-97e1-e03f0cd455e1.png?v=1776013462&width=900" alt="Snuggo product image 1" loading="eager" fetchpriority="high" width="900" height="900"></div><div class="sb__slide sb__slide--video" style="display:grid;place-items:center;background:#2a1a12;color:#fff;text-align:center;padding:24px"><div><div style="font-size:42px">&#9654;</div><p style="margin:8px 0 0;font-size:14px">Demo clip goes here<br>(10–15 s, muted, captioned)</p></div><span class="sb__cap">Sound off · captions on</span></div><div class="sb__slide"><img src="https://cdn.shopify.com/s/files/1/0677/8204/9927/files/2.png?v=1776013462&width=900" alt="Snuggo product image 2" loading="lazy" width="900" height="900"></div><div class="sb__slide"><img src="https://cdn.shopify.com/s/files/1/0677/8204/9927/files/3.png?v=1776013462&width=900" alt="Snuggo product image 3" loading="lazy" width="900" height="900"></div><div class="sb__slide"><img src="https://cdn.shopify.com/s/files/1/0677/8204/9927/files/4.png?v=1776013462&width=900" alt="Snuggo product image 4" loading="lazy" width="900" height="900"></div><div class="sb__slide"><img src="https://cdn.shopify.com/s/files/1/0677/8204/9927/files/6.png?v=1776013462&width=900" alt="Snuggo product image 5" loading="lazy" width="900" height="900"></div><div class="sb__slide"><img src="https://cdn.shopify.com/s/files/1/0677/8204/9927/files/5.png?v=1776013462&width=900" alt="Snuggo product image 6" loading="lazy" width="900" height="900"></div><div class="sb__slide"><img src="https://cdn.shopify.com/s/files/1/0677/8204/9927/files/7.png?v=1776013462&width=900" alt="Snuggo product image 7" loading="lazy" width="900" height="900"></div><div class="sb__slide"><img src="https://cdn.shopify.com/s/files/1/0677/8204/9927/files/8.png?v=1776013462&width=900" alt="Snuggo product image 8" loading="lazy" width="900" height="900"></div></div>
+   <div class="sb__dots" aria-hidden="true"><i class="is-on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="sb__box">
+   <a class="sb__rating" href="#reviews"><span class="sb__stars" aria-hidden="true">★★★★★</span><span>[Real rating] from [N] parent reviews</span></a>
+   <h1 class="sb__title">Their favourite toy, talking back</h1>
+   <div class="sb__price"><span class="sb__now" data-price>$199</span><s class="sb__was" data-compare>$299</s></div>
+   <p class="sb__split">or 4 payments of <span data-split>$49.75</span> with Afterpay</p>
+   <p class="sb__offer" data-offer>Black Friday: $100 off until Mon 30 Nov</p>
+   <p class="sb__note">Uses their own soft toy. Toy not included.</p>
+   <p class="sb__sub">Snuggo clips onto the plush they already love and chats with them. You read every word in the free parent app.</p>
+   <form id="sb-form" class="sb__form" action="#" onsubmit="event.preventDefault();this.querySelector('[data-cta]').textContent='Added ✓ (prototype)'">
+    <fieldset class="sb__packs"><legend class="sb__legend">How many?</legend>
+     <label class="sb__pack"><input type="radio" name="pack" value="1" data-price="$199" data-compare="$299" data-split="$49.75" checked>
+      <span class="sb__pack-main"><strong>One Snuggo</strong><small>For one child</small></span>
+      <span class="sb__pack-price"><strong>$199</strong><s>$299</s></span></label>
+     <label class="sb__pack"><input type="radio" name="pack" value="2" data-price="$349" data-compare="$598" data-split="$87.25">
+      <span class="sb__pack-main"><strong>Two Snuggos</strong><small>One each, no taking turns</small></span>
+      <span class="sb__pack-price"><strong>$349</strong><small>$174.50 each</small></span><em class="sb__tag">Best for siblings</em></label>
+    </fieldset>
+    <button type="submit" class="sb__cta" data-cta>Add to cart</button>
+   </form>
+   <p class="sb__ship">Free shipping · Order by Tue 15 Dec for Christmas</p>
+   <ul class="sb__trust">
+    <li><span class="sb__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span>Only listens while the button is held</span></li>
+    <li><span class="sb__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3l2-2h5M21 17V7h-3l-1-1M8 8.5A4 4 0 0 0 12 16a4 4 0 0 0 3.5-2M3 3l18 18"/></svg></span><span>No camera, no screen</span></li>
+    <li><span class="sb__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><span>You read every word in the app</span></li>
+   </ul>
+   <p class="sb__wifi">Works on your home Wi-Fi with the free parent app (iOS &amp; Android).</p>
+  </div>
+ </div>
+ <div class="sb__sticky" data-sticky aria-hidden="true">
+  <span><strong data-price>$199</strong> <s data-compare>$299</s></span>
+  <button type="submit" form="sb-form" class="sb__cta sb__cta--sm" tabindex="-1">Add to cart</button>
+ </div>
+</section>
+<div style="height:120vh;padding:24px 16px;color:#3b2418;opacity:.6">Rest of the product page…</div>
+<script>
+(function(){
+ var root=document.getElementById('sb');
+ root.querySelectorAll('input[name="pack"]').forEach(function(r){r.addEventListener('change',function(){
+  root.querySelectorAll('[data-price]').forEach(function(el){el.textContent=r.dataset.price});
+  root.querySelectorAll('[data-compare]').forEach(function(el){el.textContent=r.dataset.compare});
+  root.querySelectorAll('[data-split]').forEach(function(el){el.textContent=r.dataset.split});
+ })});
+ var end=root.dataset.offerEnd;
+ if(end&&new Date()>new Date(end+'T23:59:59+11:00'))root.querySelectorAll('[data-offer]').forEach(function(el){el.hidden=true});
+ var track=root.querySelector('.sb__track'),dots=root.querySelectorAll('.sb__dots i');
+ track.addEventListener('scroll',function(){var i=Math.round(track.scrollLeft/track.clientWidth);dots.forEach(function(d,n){d.classList.toggle('is-on',n===i)})},{passive:true});
+ var cta=root.querySelector('[data-cta]'),bar=root.querySelector('[data-sticky]');
+ new IntersectionObserver(function(e){var off=!e[0].isIntersecting&&e[0].boundingClientRect.top<0;bar.classList.toggle('is-on',off);bar.setAttribute('aria-hidden',off?'false':'true');bar.querySelector('button').tabIndex=off?0:-1}).observe(cta);
+})();
+</script>
+</body></html>
